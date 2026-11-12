@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/Theme-AMOLED-00D9F5?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Built%20with-Capacitor-119EFF?style=for-the-badge&logo=capacitor&logoColor=white" />
   <img src="https://img.shields.io/badge/Project-Unofficial-FFD43B?style=for-the-badge" />
-</p>---
+</p>
 
 ✨ About
 
