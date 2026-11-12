@@ -38,11 +38,9 @@ Feature| Description
 - JavaScript
 - Capacitor
 
-📸 Screenshots
-
-More screenshots coming soon.
-
 ⚠️ Disclaimer
+
+This app is entirely vibecoded with Gemini, in fact this is the only human written sentence in this readme.
 
 FMHY Vault is an unofficial, independently developed project. It is not affiliated with, endorsed by, or officially maintained by FMHY or its contributors.
 
