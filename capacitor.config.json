@@ -1,0 +1,13 @@
+{
+  "appId": "com.jarell.fmhyvault",
+  "appName": "FMHY Vault",
+  "webDir": "www",
+  "backgroundColor": "#000000",
+  "android": {
+    "backgroundColor": "#000000",
+    "allowMixedContent": true
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

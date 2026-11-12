@@ -1,0 +1,14 @@
+{
+  "name": "fmhy-vault",
+  "version": "1.0.0",
+  "description": "Unofficial AMOLED Android Dashboard for FMHY",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  }
+}
