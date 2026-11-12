@@ -5,7 +5,7 @@
   <br />
   Explore, organise and discover thousands of resources through a clean, mobile-first experience.
 </p><p align="center">
-  <img src="screenshots/home.png" alt="FMHY Vault app interface" width="320" />
+  <img src="screenshots/Screenshot_20261112_035524_FMHY Vault.jpg" alt="FMHY Vault app interface" width="320" />
 </p><p align="center">
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" />
   <img src="https://img.shields.io/badge/Theme-AMOLED-00D9F5?style=for-the-badge" />
