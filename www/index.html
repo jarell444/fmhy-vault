@@ -1,1 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <title>FMHY Vault</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Top App Header (Safe-Area Aware) -->
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-logo">⚡</span>
+      <div>
+        <h1>FMHY <span class="brand-badge">AMOLED</span></h1>
+        <p id="sync-status" class="sync-status">Checking local cache...</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="sync-btn" class="btn-sync" title="Fetch latest markdown from GitHub">
+        <span id="sync-icon">↻</span> Sync
+      </button>
+    </div>
+  </header>
 
+  <!-- Main Scrollable Feed -->
+  <main class="main-content" id="main-scroll">
+    <!-- Horizontal Pinned Essentials Section -->
+    <section id="essentials-section" class="essentials-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h2>📌 My Essentials</h2>
+          <span id="pinned-count" class="badge-count">0</span>
+        </div>
+        <div class="backup-actions">
+          <button id="export-pins-btn" class="btn-mini" title="Export Pinned JSON">Export</button>
+          <button id="import-pins-btn" class="btn-mini" title="Import Pinned JSON">Import</button>
+          <input type="file" id="import-file-input" accept=".json,application/json" hidden />
+        </div>
+      </div>
+      <div id="essentials-list" class="essentials-carousel"></div>
+    </section>
+
+    <!-- Active Filter & Results Info Bar -->
+    <section class="feed-section">
+      <div class="feed-meta-bar">
+        <div class="feed-title-group">
+          <span id="results-title" class="feed-title">Top Vetted Resources</span>
+          <button id="clear-subcat-btn" class="clear-subcat-chip hidden" title="Clear subcategory filter">
+            <span id="active-subcat-label"></span> ✕
+          </button>
+        </div>
+        <span id="results-count" class="results-count">0 items</span>
+      </div>
+
+      <!-- Loading Skeleton / Progress -->
+      <div id="loading-box" class="loading-box hidden">
+        <div class="spinner"></div>
+        <p id="loading-text">Fetching raw Markdown from fmhy/edit...</p>
+      </div>
+
+      <!-- Resource Cards Container -->
+      <div id="resources-list" class="cards-grid"></div>
+
+      <!-- Load More Button for Smooth 120Hz Scrolling -->
+      <div id="load-more-wrap" class="load-more-wrap hidden">
+        <button id="load-more-btn" class="btn-load-more">Show More Resources</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Thumb-Friendly Bottom Dock (Safe-Area Aware) -->
+  <nav class="bottom-dock">
+    <!-- Secondary Subcategory Filter Pills (Visible when a category is selected) -->
+    <div id="subcategory-pills" class="subcategory-pills hidden"></div>
+
+    <!-- Primary Horizontal Category Filter Pills -->
+    <div id="category-pills" class="category-pills"></div>
+
+    <!-- Search Input & Starred Toggle Row -->
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔎</span>
+        <input
+          type="search"
+          id="search-input"
+          placeholder="Search sites, tools, ROMs, streams..."
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+        <button id="clear-search-btn" class="clear-search-btn hidden" aria-label="Clear search">✕</button>
+      </div>
+
+      <button id="starred-toggle" class="starred-toggle active" aria-pressed="true" title="Toggle Starred Only">
+        <span>⭐</span>
+        <span class="starred-label">Starred</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</bo
+  dy>
+</html>
