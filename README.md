@@ -5,11 +5,10 @@
   <br />
   Explore, organise and discover thousands of resources through a clean, mobile-first experience.
 </p><p align="center">
-  <img src="screenshots/Screenshot_20261112_035524_FMHY Vault.jpg" alt="FMHY Vault app interface" width="320" />
-</p><p align="center">
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" />
   <img src="https://img.shields.io/badge/Theme-AMOLED-00D9F5?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Built%20with-Capacitor-119EFF?style=for-the-badge&logo=capacitor&logoColor=white" />
+  <img src="https://img.shields.io/badge/Project-Unofficial-FFD43B?style=for-the-badge" />
 </p>---
 
 ✨ About
@@ -31,7 +30,13 @@ Feature| Description
 📥 Import & Export| Manage your saved essentials.
 🌑 AMOLED Interface| A dark, minimal interface with vibrant cyan and yellow accents.
 
-🛠️ Built With
+📸 Screenshots
+
+<p align="center">
+  <img src="screenshots/Screenshot_20261112_035524_FMHY%20Vault.jpg" alt="FMHY Vault home screen" width="320" />
+  <br />
+  <em>FMHY Vault — Main dashboard</em>
+</p>🛠️ Built With
 
 - HTML
 - CSS
@@ -40,11 +45,17 @@ Feature| Description
 
 ⚠️ Disclaimer
 
-This app is entirely vibecoded with Gemini, in fact this is the only human written sentence in this readme.
-
 FMHY Vault is an unofficial, independently developed project. It is not affiliated with, endorsed by, or officially maintained by FMHY or its contributors.
 
 All linked websites, tools and third-party resources belong to their respective owners. Users are responsible for complying with applicable laws and the terms of any services they access.
+
+🤖 Development Disclaimer
+
+FMHY Vault was developed with assistance from AI-powered coding tools using a process commonly known as vibe coding.
+
+While every effort has been made to create a functional and useful application, the code may contain bugs, unexpected behaviour or areas that could be improved. Contributions, suggestions and bug reports are welcome!
+
+---
 
 🙌 Credits
 
