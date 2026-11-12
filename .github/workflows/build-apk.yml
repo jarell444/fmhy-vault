@@ -10,6 +10,8 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -29,10 +31,21 @@ jobs:
       - name: Install Capacitor dependencies
         run: npm install
 
-      - name: Generate Android project & sync www/ assets
+      - name: Generate Android project
+        run: npx cap add android
+
+      - name: Generate Custom App Icons & AMOLED Splash Screens
         run: |
-          npx cap add android
-          npx cap sync android
+          if [ -f "assets/icon.png" ]; then
+            cp assets/icon.png assets/icon-only.png
+            cp assets/icon.png assets/icon-foreground.png
+            cp assets/icon.png assets/splash.png
+            cp assets/icon.png assets/splash-dark.png
+            npx --yes @capacitor/assets generate --android --iconBackgroundColor '#000000' --iconBackgroundColorDark '#000000' --splashBackgroundColor '#000000' --splashBackgroundColorDark '#000000'
+          fi
+
+      - name: Sync www/ assets into Android project
+        run: npx cap sync android
 
       - name: Configure Pitch-Black AMOLED Launch Theme & Internet Permissions
         run: |
@@ -52,3 +65,13 @@ jobs:
           name: FMHY-Vault-APK
           path: FMHY-Vault.apk
           if-no-files-found: error
+
+      - name: Publish APK to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "FMHY Vault (Latest Build)"
+          body: "Automated AMOLED Android build synced with fmhy/edit."
+          files: FMHY-Vault.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
