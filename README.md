@@ -1,4 +1,4 @@
-⚡ FMHY Vault
+<p align="center">⚡ FMHY Vault</p>
 
 <p align="center">
   <strong>An unofficial AMOLED Android companion for FMHY.</strong>
@@ -19,21 +19,46 @@ Designed with a focus on usability, organisation and a true AMOLED-friendly aest
 
 🚀 Features
 
-Feature| Description
-⚡ Resource Library| Browse thousands of FMHY resources in one place.
-🔄 Sync| Refresh and synchronise the latest available resources.
-⭐ Starred Resources| Keep your favourite resources close at hand.
-📌 My Essentials| Pin frequently used resources for quick access.
-🔍 Search| Find websites, tools, ROMs and other resources.
-🗂️ Categories| Browse resources through organised categories.
-🔗 Multiple Mirrors| Access alternative links where available.
-📥 Import & Export| Manage your saved essentials.
-🌑 AMOLED Interface| A dark, minimal interface with vibrant cyan and yellow accents.
+⚡ Resource Library
+
+Browse thousands of FMHY resources in one convenient place.
+
+🔄 Automatic Resource Sync
+
+Refresh and synchronise the latest available resources.
+
+⭐ Starred Resources
+
+Keep your favourite resources easily accessible.
+
+📌 My Essentials
+
+Pin frequently used resources for quick access.
+
+🔍 Search
+
+Find websites, tools, ROMs and other resources with ease.
+
+🗂️ Category Browsing
+
+Explore resources through organised categories.
+
+🔗 Multiple Mirrors
+
+Access alternative links where available.
+
+📥 Import & Export
+
+Import and export your saved essentials.
+
+🌑 AMOLED Interface
+
+A dark, minimal interface with vibrant cyan and yellow accents, designed with AMOLED displays in mind.
 
 📸 Screenshots
 
 <p align="center">
-  <img src="screenshots/Screenshot_20261112_035524_FMHY%20Vault.jpg" alt="FMHY Vault home screen" width="320" />
+  <img src="screenshots/Screenshot_20261112_035524_FMHY%20Vault.jpg" alt="FMHY Vault main dashboard" width="320" />
   <br />
   <em>FMHY Vault — Main dashboard</em>
 </p>🛠️ Built With
@@ -54,8 +79,6 @@ All linked websites, tools and third-party resources belong to their respective 
 FMHY Vault was developed with assistance from AI-powered coding tools using a process commonly known as vibe coding.
 
 While every effort has been made to create a functional and useful application, the code may contain bugs, unexpected behaviour or areas that could be improved. Contributions, suggestions and bug reports are welcome!
-
----
 
 🙌 Credits
 
