@@ -1,0 +1,54 @@
+name: Build FMHY Vault APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up JDK 17 for Gradle & Capacitor
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Capacitor dependencies
+        run: npm install
+
+      - name: Generate Android project & sync www/ assets
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Configure Pitch-Black AMOLED Launch Theme & Internet Permissions
+        run: |
+          chmod +x android/gradlew
+          sed -i 's/android:allowBackup="true"/android:allowBackup="true" android:usesCleartextTraffic="true"/g' android/app/src/main/AndroidManifest.xml
+
+      - name: Compile Debug APK with Gradle
+        working-directory: ./android
+        run: ./gradlew assembleDebug
+
+      - name: Rename APK for easy download
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk FMHY-Vault.apk
+
+      - name: Upload Compiled APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FMHY-Vault-APK
+          path: FMHY-Vault.apk
+          if-no-files-found: error
