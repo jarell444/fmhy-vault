@@ -39,6 +39,10 @@ Pin frequently used resources for quick access.
 
 Find websites, tools, ROMs and other resources with ease.
 
+🔒 Base64 Decoding
+
+Easily get to where you're headed with a built in decoder.
+
 🗂️ Category Browsing
 
 Explore resources through organised categories.
