@@ -1,5 +1,5 @@
 // ============================================================================
-// FMHY Vault — Pure Vanilla JS Engine (v2: Clean Parser, Subcategories, Copy)
+// FMHY Vault — Pure Vanilla JS Engine (v3: Base64 Decoder Modal + Inline Chips)
 // ============================================================================
 
 const DB_NAME = 'fmhy_vault_db';
@@ -102,6 +102,18 @@ const els = {
   syncBtn: document.getElementById('sync-btn'),
   syncIcon: document.getElementById('sync-icon'),
   syncStatus: document.getElementById('sync-status'),
+  b64OpenBtn: document.getElementById('b64-open-btn'),
+  b64Modal: document.getElementById('b64-modal'),
+  b64CloseBtn: document.getElementById('b64-close-btn'),
+  b64Input: document.getElementById('b64-input'),
+  b64Output: document.getElementById('b64-output'),
+  b64PasteBtn: document.getElementById('b64-paste-btn'),
+  b64ClearBtn: document.getElementById('b64-clear-btn'),
+  b64DecodeBtn: document.getElementById('b64-decode-btn'),
+  b64EncodeBtn: document.getElementById('b64-encode-btn'),
+  b64CopyBtn: document.getElementById('b64-copy-btn'),
+  b64LinksWrap: document.getElementById('b64-links-wrap'),
+  b64LinksList: document.getElementById('b64-links-list'),
   essentialsList: document.getElementById('essentials-list'),
   pinnedCount: document.getElementById('pinned-count'),
   exportPinsBtn: document.getElementById('export-pins-btn'),
@@ -173,7 +185,119 @@ async function loadDatasetFromCache() {
 }
 
 // ============================================================================
-// 2. Improved Live FMHY Markdown Parser (Clean Descriptions & Labeled Mirrors)
+// 2. Base64 Decoder / Encoder Engine & Auto-Detection
+// ============================================================================
+
+function decodeSingleB64Token(token) {
+  let clean = token.trim().replace(/-/g, '+').replace(/_/g, '/');
+  while (clean.length % 4 !== 0) {
+    clean += '=';
+  }
+  const binary = atob(clean);
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+}
+
+function decodeBase64Input(rawInput) {
+  const trimmed = (rawInput || '').trim();
+  if (!trimmed) return '';
+
+  // Support multi-line or space-separated Base64 strings
+  const lines = trimmed.split(/\r?\n/);
+  const decodedLines = lines.map((line) => {
+    const part = line.trim();
+    if (!part) return '';
+    try {
+      return decodeSingleB64Token(part);
+    } catch (e) {
+      return `[Invalid Base64]: ${part}`;
+    }
+  });
+  return decodedLines.join('\n');
+}
+
+function encodeBase64Input(rawInput) {
+  const text = rawInput || '';
+  if (!text) return '';
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+  bytes.forEach((b) => {
+    binary += String.fromCharCode(b);
+  });
+  return btoa(binary);
+}
+
+// Detect potential Base64 strings inside a card description (e.g. aHR0cHM6Ly9...)
+function findBase64InText(text) {
+  if (!text) return null;
+  const tokens = text.split(/[\s,;|()[\]"'`]+/);
+  for (const tok of tokens) {
+    if (
+      tok.length >= 16 &&
+      /^[A-Za-z0-9+/_-]+={0,2}$/.test(tok) &&
+      !/^https?:\/\//i.test(tok)
+    ) {
+      try {
+        const decoded = decodeSingleB64Token(tok);
+        // Verify it decodes to printable ASCII / UTF-8 text (especially URLs)
+        if (decoded && /^[\x20-\x7E\r\n\t]+$/.test(decoded) && (decoded.includes('http') || decoded.includes('.') || decoded.includes('/'))) {
+          return tok;
+        }
+      } catch (e) {
+        // Ignore non-Base64 words
+      }
+    }
+  }
+  return null;
+}
+
+function updateB64ModalOutput(mode = 'decode') {
+  const raw = els.b64Input.value;
+  if (!raw.trim()) {
+    els.b64Output.value = '';
+    els.b64LinksWrap.classList.add('hidden');
+    els.b64LinksList.innerHTML = '';
+    return;
+  }
+
+  const result = mode === 'encode' ? encodeBase64Input(raw) : decodeBase64Input(raw);
+  els.b64Output.value = result;
+
+  // Extract any http/https links from the decoded output so the user can tap them directly
+  const urlMatches = result.match(/https?:\/\/[^\s"'<>)+]+/gi) || [];
+  if (urlMatches.length > 0 && mode === 'decode') {
+    els.b64LinksWrap.classList.remove('hidden');
+    els.b64LinksList.innerHTML = '';
+    const uniqueUrls = [...new Set(urlMatches)];
+    uniqueUrls.forEach((u) => {
+      const a = document.createElement('a');
+      a.className = 'b64-detected-link';
+      a.href = u;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.innerHTML = `<span>${escapeHtml(u)}</span> <span>↗</span>`;
+      els.b64LinksList.appendChild(a);
+    });
+  } else {
+    els.b64LinksWrap.classList.add('hidden');
+    els.b64LinksList.innerHTML = '';
+  }
+}
+
+function openB64Modal(prefillString = '') {
+  els.b64Modal.classList.remove('hidden');
+  if (prefillString) {
+    els.b64Input.value = prefillString;
+    updateB64ModalOutput('decode');
+  }
+}
+
+function closeB64Modal() {
+  els.b64Modal.classList.add('hidden');
+}
+
+// ============================================================================
+// 3. Live FMHY Markdown Parser
 // ============================================================================
 
 function extractDomain(url) {
@@ -188,7 +312,6 @@ function formatMirrorLabel(rawLabel, url, index) {
   const cleaned = (rawLabel || '').replace(/[*_~`]/g, '').trim();
   const domain = extractDomain(url);
 
-  // If the label is empty or just a number like "2", "3", give it a descriptive label
   if (!cleaned || /^\d+$/.test(cleaned)) {
     const num = cleaned || index + 2;
     return domain ? `Mirror ${num} (${domain})` : `Mirror ${num}`;
@@ -198,19 +321,13 @@ function formatMirrorLabel(rawLabel, url, index) {
 
 function cleanDescriptionText(rawLine) {
   let desc = rawLine
-    // Strip bullet prefix and star markers
     .replace(/^[-*+▷]\s+/, '')
     .replace(/⭐|🌟|:star:|\{\.star\}/g, '')
-    // Strip ALL markdown links [Label](https://...) so mirror labels don't clutter description
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '')
-    // Strip leftover markdown formatting characters
     .replace(/[*_`~]/g, '')
-    // Strip empty parentheses, brackets, or parens containing only punctuation/spaces
     .replace(/\([\s,;/|:-]*\)/g, '')
     .replace(/\[[\s,;/|:-]*\]/g, '')
-    // Collapse repeated punctuation separators like " - / ", ", ,", " / / "
     .replace(/(\s*[,/|•–—-]\s*){2,}/g, ' - ')
-    // Strip leading or trailing dangling separators ("- ", "/ ", ", ", "| ")
     .replace(/^[\s,;/|•–—:-]+/, '')
     .replace(/[\s,;/|•–—:-]+$/, '')
     .replace(/\s+/g, ' ')
@@ -231,7 +348,6 @@ function parseFMHYMarkdown(markdownText, categoryId, categoryLabel) {
     const rawLine = lines[i].trim();
     if (!rawLine) continue;
 
-    // Track section / subcategory headings
     const headingMatch = rawLine.match(headingRegex);
     if (headingMatch) {
       const cleanHeading = headingMatch[2]
@@ -246,7 +362,6 @@ function parseFMHYMarkdown(markdownText, categoryId, categoryLabel) {
       continue;
     }
 
-    // Only parse bullet list items containing http/https links
     if (!/^[-*+]\s+/.test(rawLine) && !/^▷\s+/.test(rawLine)) continue;
     if (!rawLine.includes('http')) continue;
 
@@ -272,7 +387,6 @@ function parseFMHYMarkdown(markdownText, categoryId, categoryLabel) {
     const primary = externalLinks[0];
     const primaryTitle = primary.rawLabel.replace(/[*_~`]/g, '').trim() || extractDomain(primary.url);
 
-    // Format secondary links with clean, meaningful labels
     const mirrors = externalLinks.slice(1).map((m, idx) => ({
       label: formatMirrorLabel(m.rawLabel, m.url, idx),
       url: m.url
@@ -300,7 +414,7 @@ function parseFMHYMarkdown(markdownText, categoryId, categoryLabel) {
 }
 
 // ============================================================================
-// 3. GitHub Fetcher
+// 4. GitHub Fetcher
 // ============================================================================
 
 async function fetchCategorySource(source) {
@@ -372,10 +486,10 @@ async function syncAllFromGitHub() {
 }
 
 // ============================================================================
-// 4. Clipboard Copy Helper & Pinned Essentials Management
+// 5. Clipboard Copy Helper & Pinned Essentials Management
 // ============================================================================
 
-async function copyUrlToClipboard(url, title, btnEl) {
+async function copyUrlToClipboard(url, labelText, btnEl) {
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(url);
@@ -399,9 +513,9 @@ async function copyUrlToClipboard(url, title, btnEl) {
         btnEl.classList.remove('copied');
       }, 1200);
     }
-    showToast(`Copied link for "${title}"`);
+    showToast(`Copied "${labelText}"`);
   } catch (err) {
-    showToast('Failed to copy URL');
+    showToast('Failed to copy to clipboard');
   }
 }
 
@@ -481,7 +595,7 @@ function importPinsBackup(file) {
 }
 
 // ============================================================================
-// 5. Card Rendering (Compact Horizontal Essentials + Full Feed Cards)
+// 6. Card Rendering (Compact Horizontal Essentials + Full Feed Cards)
 // ============================================================================
 
 function selectSubcategoryFilter(categoryId, subcategoryName) {
@@ -564,7 +678,6 @@ function createResourceCard(item) {
   const card = document.createElement('article');
   card.className = `resource-card${item.starred ? ' is-starred' : ''}${isPinned ? ' is-pinned' : ''}`;
 
-  // Top row: Star + Title Link + Copy & Pin Buttons
   const topRow = document.createElement('div');
   topRow.className = 'card-top';
 
@@ -608,7 +721,7 @@ function createResourceCard(item) {
   topRow.appendChild(actionsDiv);
   card.appendChild(topRow);
 
-  // Category & Tappable Subcategory Badge
+  // Category, Tappable Subcategory & Auto-Detected Base64 Chip
   const metaRow = document.createElement('div');
   metaRow.className = 'card-meta-tags';
 
@@ -627,9 +740,18 @@ function createResourceCard(item) {
 
   metaRow.appendChild(catSpan);
   metaRow.appendChild(subcatBtn);
+
+  const detectedB64 = findBase64InText(item.desc);
+  if (detectedB64) {
+    const b64Chip = document.createElement('button');
+    b64Chip.className = 'tag-b64-chip';
+    b64Chip.textContent = '🔓 Decode Base64';
+    b64Chip.addEventListener('click', () => openB64Modal(detectedB64));
+    metaRow.appendChild(b64Chip);
+  }
+
   card.appendChild(metaRow);
 
-  // Clean Description
   if (item.desc) {
     const descP = document.createElement('p');
     descP.className = 'card-desc';
@@ -637,7 +759,6 @@ function createResourceCard(item) {
     card.appendChild(descP);
   }
 
-  // Expandable Mirrors / Related Links with Preserved Labels
   if (item.mirrors && item.mirrors.length > 0) {
     const mirrorsWrap = document.createElement('div');
     mirrorsWrap.className = 'mirrors-wrap';
@@ -697,7 +818,7 @@ function renderPinnedEssentials() {
 }
 
 // ============================================================================
-// 6. Category Pills, Subcategory Pills & Filtering
+// 7. Category Pills, Subcategory Pills & Filtering
 // ============================================================================
 
 function renderCategoryPills() {
@@ -733,14 +854,12 @@ function renderCategoryPills() {
 }
 
 function renderSubcategoryPills() {
-  // Show subcategory row whenever a specific category is active (or a subcategory is selected)
   if (state.activeCategory === 'all' && state.activeSubcategory === 'all') {
     els.subcategoryPills.classList.add('hidden');
     els.subcategoryPills.innerHTML = '';
     return;
   }
 
-  // Gather unique subcategories for the active category
   const subcatSet = new Set();
   state.allItems.forEach((item) => {
     if (state.activeCategory === 'all' || item.categoryId === state.activeCategory) {
@@ -787,7 +906,6 @@ function applyFiltersAndRender(resetLimit = true) {
 
   const q = state.searchQuery.trim().toLowerCase();
 
-  // Update active subcategory chip in the feed header
   if (state.activeSubcategory !== 'all') {
     els.clearSubcatBtn.classList.remove('hidden');
     els.activeSubcatLabel.textContent = `▶ ${state.activeSubcategory}`;
@@ -848,7 +966,7 @@ function renderFeedList() {
 }
 
 // ============================================================================
-// 7. Utilities & Initialization
+// 8. Utilities & Initialization
 // ============================================================================
 
 function escapeHtml(str) {
@@ -868,12 +986,53 @@ function showToast(msg) {
     els.toast.classList.add('hidden');
   }, 2400);
 }
+
 async function initApp() {
   loadPins();
   renderCategoryPills();
   renderPinnedEssentials();
 
   els.syncBtn.addEventListener('click', () => syncAllFromGitHub());
+
+  // Base64 Modal Events
+  els.b64OpenBtn.addEventListener('click', () => openB64Modal());
+  els.b64CloseBtn.addEventListener('click', closeB64Modal);
+  els.b64Modal.addEventListener('click', (e) => {
+    if (e.target === els.b64Modal) closeB64Modal();
+  });
+
+  els.b64Input.addEventListener('input', () => updateB64ModalOutput('decode'));
+  els.b64DecodeBtn.addEventListener('click', () => updateB64ModalOutput('decode'));
+  els.b64EncodeBtn.addEventListener('click', () => updateB64ModalOutput('encode'));
+
+  els.b64PasteBtn.addEventListener('click', async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        els.b64Input.value = text;
+        updateB64ModalOutput('decode');
+        showToast('Pasted from clipboard');
+      }
+    } catch (err) {
+      els.b64Input.focus();
+      showToast('Long-press inside the box to paste');
+    }
+  });
+
+  els.b64ClearBtn.addEventListener('click', () => {
+    els.b64Input.value = '';
+    updateB64ModalOutput('decode');
+    els.b64Input.focus();
+  });
+
+  els.b64CopyBtn.addEventListener('click', () => {
+    const out = els.b64Output.value;
+    if (!out) {
+      showToast('Nothing to copy yet');
+      return;
+    }
+    copyUrlToClipboard(out, 'decoded text', els.b64CopyBtn);
+  });
 
   els.clearSubcatBtn.addEventListener('click', () => {
     state.activeSubcategory = 'all';
@@ -920,7 +1079,6 @@ async function initApp() {
     }
   });
 
-  // Load v2 cached dataset or auto-sync on first launch
   const cachedItems = await loadDatasetFromCache();
   const lastSync = localStorage.getItem(META_STORAGE_KEY);
 
@@ -930,7 +1088,7 @@ async function initApp() {
     renderSubcategoryPills();
     applyFiltersAndRender(true);
   } else {
-    els.syncStatus.textContent = 'Refreshing dataset with v2 parser...';
+    els.syncStatus.textContent = 'Syncing FMHY repo...';
     await syncAllFromGitHub();
   }
 }

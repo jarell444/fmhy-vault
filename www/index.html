@@ -18,6 +18,9 @@
       </div>
     </div>
     <div class="header-actions">
+      <button id="b64-open-btn" class="btn-tool" title="Open Base64 Decoder / Encoder">
+        <span>🔓</span> B64
+      </button>
       <button id="sync-btn" class="btn-sync" title="Fetch latest markdown from GitHub">
         <span id="sync-icon">↻</span> Sync
       </button>
@@ -72,7 +75,7 @@
 
   <!-- Thumb-Friendly Bottom Dock (Safe-Area Aware) -->
   <nav class="bottom-dock">
-    <!-- Secondary Subcategory Filter Pills (Visible when a category is selected) -->
+    <!-- Secondary Subcategory Filter Pills -->
     <div id="subcategory-pills" class="subcategory-pills hidden"></div>
 
     <!-- Primary Horizontal Category Filter Pills -->
@@ -101,10 +104,64 @@
     </div>
   </nav>
 
+  <!-- Base64 Decoder / Encoder Modal -->
+  <div id="b64-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="b64-modal-title">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span>🔓</span>
+          <h3 id="b64-modal-title">Base64 Utility</h3>
+        </div>
+        <button id="b64-close-btn" class="modal-close-btn" aria-label="Close Base64 modal">✕</button>
+      </div>
+
+      <div class="b64-body">
+        <div class="b64-label-row">
+          <label for="b64-input">Input (Base64 or Plain Text)</label>
+          <div class="b64-quick-btns">
+            <button id="b64-paste-btn" class="btn-mini">📋 Paste</button>
+            <button id="b64-clear-btn" class="btn-mini">Clear</button>
+          </div>
+        </div>
+        <textarea
+          id="b64-input"
+          class="b64-textarea"
+          rows="3"
+          placeholder="Paste a Base64 string (e.g. aHR0cHM6Ly9...) or plain text..."
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        ></textarea>
+
+        <div class="b64-mode-row">
+          <button id="b64-decode-btn" class="b64-action-btn primary">Decode Base64</button>
+          <button id="b64-encode-btn" class="b64-action-btn">Encode to Base64</button>
+        </div>
+
+        <div class="b64-label-row">
+          <label for="b64-output">Result</label>
+          <button id="b64-copy-btn" class="btn-mini">📋 Copy Result</button>
+        </div>
+        <textarea
+          id="b64-output"
+          class="b64-textarea output"
+          rows="3"
+          readonly
+          placeholder="Decoded output will appear here..."
+        ></textarea>
+
+        <!-- Clickable Extracted Links (Auto-shown when decoded text contains URLs) -->
+        <div id="b64-links-wrap" class="b64-links-wrap hidden">
+          <span class="b64-links-label">Detected Links (Tap to open in external browser):</span>
+          <div id="b64-links-list" class="b64-links-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="toast hidden"></div>
 
   <script src="app.js"></script>
-</bo
-  dy>
+</body>
 </html>
